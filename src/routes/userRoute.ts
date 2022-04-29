@@ -3,6 +3,7 @@ import { TodoInstance } from "../model/userModel";
 import TodoValidator from "../validator/user.validator"
 import Middleware  from "../middleware/handleValidation"
 import handleValidation from "../middleware/handleValidation";
+import { appendFile } from "fs";
 
 const UserRouter = Router()
 // const {addUser} = require("../dao/userDao")
@@ -52,6 +53,23 @@ UserRouter.route("/update/:id").put(TodoValidator.checkIdParam(),Middleware.hand
 
       } catch (error) {
             throw error
+      }
+})
+
+UserRouter.route("/delete/:id").delete(TodoValidator.checkIdParam(), Middleware.handleValidationError, async (req: Request, res: Response) => {
+      
+      try {
+            const { id } = req.params;
+            const record = await TodoInstance.findOne({where: {id}})
+
+            if(!record) return res.status(200).send({message: "Can not find in the existing record"})
+
+            const deleteRecord = await record.destroy()
+
+            return res.send({deleteRecord})
+            
+      } catch (error) {
+            throw error;
       }
 })
 
