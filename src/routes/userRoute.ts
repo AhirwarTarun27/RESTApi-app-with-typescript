@@ -18,7 +18,7 @@ UserRouter.route("/todo_list").get(TodoValidator.checkReadTodo(),handleValidatio
  }
 })
 
-UserRouter.route("/todo_list/:id").get(async (req: Request, res: Response) => {
+UserRouter.route("/todo_list/:id").get(TodoValidator.checkIdParam(),Middleware.handleValidationError,async (req: Request, res: Response) => {
       try {
             const {id} = req.params;
             const record = await TodoInstance.findOne({ where: { id } })
@@ -36,6 +36,22 @@ UserRouter.route("/create").post(TodoValidator.checkCreateTodo(), Middleware.han
             return res.status(200).send({record})
       } catch (error) {
             throw error;
+      }
+})
+
+UserRouter.route("/update/:id").put(TodoValidator.checkIdParam(),Middleware.handleValidationError,async(req: Request, res: Response) => {
+      try {
+            const { id } = req.params;
+            const record = await TodoInstance.findOne({ where: { id } })
+            
+            if(!record) return res.send({message: "Can not find existing record"}).status(200)
+
+            const updatedRecord = await record.update({ completed: !record.getDataValue("completed") })
+            
+            return res.status(401).send({updatedRecord})
+
+      } catch (error) {
+            throw error
       }
 })
 
